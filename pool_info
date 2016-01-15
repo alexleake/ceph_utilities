@@ -1,0 +1,46 @@
+#!/usr/bin/env python
+
+# written by:
+# Alex Leake https://github.com/alexleake
+
+import rados
+import json
+
+cluster = rados.Rados(conffile='ceph.conf')
+
+# connect to cluster, print fsid
+
+cluster.connect()
+print "Cluster ID: " + cluster.get_fsid() + "\n"
+
+# print cluster stats
+
+cluster_stats = cluster.get_cluster_stats()
+percent_used = float(cluster_stats['kb_used']) / float(cluster_stats['kb']) * 100
+
+print "GLOBAL:\n"
+print "\t" + '{:<30} {:<12}'.format("Total (TB)", cluster_stats['kb'] / 1000000000)
+print "\t" + '{:<30} {:<12}'.format("Available (TB)", cluster_stats['kb_avail'] / 1000000000)
+print "\t" + '{:<30} {:<12}'.format("Used (TB)", cluster_stats['kb_used'] / 1000000000)
+print "\t" + '{:<30} {:<12}'.format("Used (%)", round(percent_used, 2))
+print "\t" + '{:<30} {:<12}'.format("Total objects", cluster_stats['num_objects']) + "\n"
+
+# print header of table
+
+print "POOLS:\n"
+print "\t" + '{:<30} {:<12} {:<12} {:<12}'.format("POOL", "Used (GB)", "Quota (GB)", "Quota (%)")
+
+# print pools
+
+pools = cluster.list_pools()
+
+for pool in pools:
+    io = cluster.open_ioctx(pool)
+    pool_stats = io.get_stats()
+    quota = json.loads(cluster.mon_command(json.dumps({"prefix": "osd pool get-quota", "pool": pool, "format": "json-pretty"}), "")[1])
+    try:
+        used = round((float(pool_stats['num_kb']) / float((quota['quota_max_bytes'] / 1000)) * 100), 2)
+    except ZeroDivisionError:
+        used = "0.00"
+    print "\t" + '{:<30} {:<12} {:<12} {:<12}'.format(pool, pool_stats['num_kb'] / 1000000, quota['quota_max_bytes'] / 1000000000, used)
+    io.close()
