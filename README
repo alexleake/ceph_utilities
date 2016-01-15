@@ -2,7 +2,4 @@ some basic ceph utils.
 
 pool_info:
 
-this is an alternative "ceph df" - it essentially does the same
-thing but i've added a column to display how much of their 
-quota is used. you'll need admin level privilages to read the 
-quota attribute from each pool. try this on a monitor. 
+this is an alternative "ceph df" - it essentially does the same thing but i've added a column to display how much of their quota is used. you'll need admin level privilages to read the quota attribute from each pool. try this on a monitor. 
