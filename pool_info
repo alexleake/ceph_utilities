@@ -6,7 +6,7 @@
 import rados
 import json
 
-cluster = rados.Rados(conffile='ceph.conf')
+cluster = rados.Rados(conffile='/etc/ceph/ceph.conf')
 
 # connect to cluster, print fsid
 
