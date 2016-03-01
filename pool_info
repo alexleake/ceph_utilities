@@ -43,4 +43,5 @@ for pool in pools:
     except ZeroDivisionError:
         used = "0.00"
     print "\t" + '{:<30} {:<12} {:<12} {:<12}'.format(pool, pool_stats['num_kb'] / 1000000, quota['quota_max_bytes'] / 1000000000, used)
-    io.close()
+
+io.close()
