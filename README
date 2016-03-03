@@ -6,5 +6,4 @@ this is an alternative "ceph df" - it essentially does the same thing but i've a
 
 osd_variance:
 
-this script will print the highest and lowest variance OSDs in your cluster, useful for finding disks which are not filling evenly. use "ceph osd crush reweight {name} {weight}" or "ceph osd reweight-by-utilization {threshold}" to 
-correct large variances.
+this script will print the highest and lowest variance OSDs in your cluster, useful for finding disks which are not filling evenly. use "ceph osd crush reweight {name} {weight}" or "ceph osd reweight-by-utilization {threshold}" to correct large variances.
