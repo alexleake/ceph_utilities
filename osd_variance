@@ -1,0 +1,56 @@
+#!/usr/bin/env python
+
+# written by: 
+# Alex Leake https://github.com/alexleake
+# and
+# Mesar Hameed https://github.com/mhameed
+
+import rados
+import json
+
+cluster = rados.Rados(conffile='/etc/ceph/ceph.conf')
+
+# connect to cluster, print fsid
+
+cluster.connect()
+print "Cluster ID: " + cluster.get_fsid() + "\n"
+
+# osd cluster stats
+
+osd_df = json.loads(cluster.mon_command(json.dumps({"prefix": "osd df", "format": "json"}), "")[1])
+osd_stat = json.loads(cluster.mon_command(json.dumps({"prefix": "osd stat", "format": "json"}), "")[1])
+
+osd_count = osd_stat['num_osds']
+
+average_utilisation = osd_df['summary']['average_utilization']
+rounded_utilisation = round(average_utilisation, 2)
+
+# print basics
+
+print "There are {osd_count} OSDs in the cluster, average utilisation is {rounded_utilisation}%\n".format(**vars())
+
+# create empty list of length n
+
+osd_list = [''] * osd_count
+
+# for each disk place that disk into the correct position in the list
+
+for disk in osd_df['nodes']:
+    osd = disk['name']
+    var = disk['var']
+    osd_index = int(osd.replace('osd.', ''))
+    if not osd_list[osd_index]:
+	osd_list[osd_index] = var
+
+# find min / max values
+
+osd_max_id = osd_list.index(max(osd_list))
+osd_max_var = max(osd_list)
+
+osd_min_id = osd_list.index(min(osd_list))
+osd_min_var = min(osd_list)
+
+# print values
+
+print "Highest variance osd is {osd_max_id} at {osd_max_var}".format(**vars())
+print "Lowest variance osd is {osd_min_id} at {osd_min_var}".format(**vars())
